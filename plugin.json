@@ -16,11 +16,6 @@
       "code": "js",
       "cmds": ["j", "js"],
       "explain": "javascript 代码集锦"
-    },
-    {
-      "code": "shici",
-      "cmds": ["sc", "shici"],
-      "explain": "古诗词大全"
     }
   ]
 }
