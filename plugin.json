@@ -4,18 +4,33 @@
   "features": [
     {
       "code": "html",
-      "cmds": ["h", "html"],
+      "cmds": ["h"],
       "explain": "html 代码集锦"
     },
     {
+      "code": "html_update",
+      "cmds": ["hu"],
+      "explain": "更新 html 代码库"
+    },
+    {
       "code": "css",
-      "cmds": ["c", "css"],
+      "cmds": ["c"],
       "explain": "css 代码集锦"
     },
     {
+      "code": "css_update",
+      "cmds": ["cu"],
+      "explain": "更新 css 代码库"
+    },
+    {
       "code": "js",
-      "cmds": ["j", "js"],
-      "explain": "javascript 代码集锦"
+      "cmds": ["j"],
+      "explain": "js 代码集锦"
+    },
+    {
+      "code": "js_update",
+      "cmds": ["ju"],
+      "explain": "更新 js 代码库"
     }
   ]
 }

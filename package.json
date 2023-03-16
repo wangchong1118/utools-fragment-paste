@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "jsdom": "^21.1.0",
-    "marked": "^4.2.12"
+    "read-excel-file": "^5.6.1"
   }
 }

@@ -1,69 +1,77 @@
-const types = require("./types.js")
-const options = {}
-const createOption = type => ({
-	mode: 'list',
-	args: {
-		enter: (action, callbackSetList) => {
-			load(type, callbackSetList)
-		},
-		search: (action, searchWord, callbackSetList) => {
-            filter(searchWord, callbackSetList)
-        },
-		select: (action, itemData, callbackSetList) => {
-            select(itemData)
-        },
-		placeholder: type + " 片段关键词",
-	}
+const types = require("./types.js");
+const updateTypes = types.map(type => type + "_update");
+const createType = type => ({
+  mode: 'list',
+  placeholder: type + "片段关键词",
+  args: {
+    enter: (action, callbackSetList) => { load(type, callbackSetList) },
+    search: (action, searchWord, callbackSetList) => { filter(searchWord, callbackSetList) },
+    select: (action, itemData, callbackSetList) => { select(itemData) }
+  }
+});
+const createUpdater = type => ({
+  mode: "none",
+  placeholder: "更新" + type + "片段仓库",
+  args: {
+    enter: (action) => { update(type.split("_")[0]); }
+  }
 })
-types.forEach(type => {
-	options[type] = createOption(type)
-})
-window.exports = options
 
-const data = []
+let items = {}
+let data = null;
+types.forEach(type => {
+  items[type] = createType(type)
+})
+updateTypes.forEach(type => {
+  items[type] = createUpdater(type)
+})
+
+window.exports = items;
 
 /**
  * 字符串格式化： trim、toLowerCase
  */
-let strFmt = str => str.trim().toLowerCase()
+const strFmt = str => str.trim().toLowerCase()
 
 /**
- * 插件初始化
+ * 新增、更新文档碎片
  */
-let load = (type, callbackSetList) => {
-  const fs = require("node:fs")
-  const path = require("node:path")
-  const marked = require("marked")
-  const jsdom = require('jsdom')
-
-  const dataPath = path.resolve(__dirname, `./doc/${type}.md`)
-  let domList = jsdom.JSDOM.fragment(marked.parse(fs.readFileSync(dataPath, "utf8"))).children
-  domList = Array.from(domList, item => {
-  	let res = item.nodeName === "H1" ? item.innerHTML : item.firstChild.innerHTML.slice(0, -1)
-  	return res
+const update = type => {
+  const dbInstance = utools.db.get(type);
+  const {resolve} = require('path');
+  const readXlsxFile = require('read-excel-file/node')
+  const filePath = resolve(__dirname, "./doc/" + type + ".xlsx");
+  readXlsxFile(filePath).then((rows) => {
+    let dbObj = dbInstance ? {_id: type, data: rows, _rev: dbInstance._rev} : {_id: type, data: rows}
+    utools.db.put(dbObj)
+    utools.showNotification(type + "存储数据库已更新，点击本弹窗查看更新内容", type)
+    window.utools.hideMainWindow()
+    window.utools.outPlugin()
   })
+}
 
-  const keys = domList.filter((item, index) => !(index%2))
-  const values = domList.filter((item, index) => index%2)
-  keys.forEach((item, index) => {
-  	data.push({ title: item.split("---")[0], description: item.split("---")[1], content: values[index] })
-  })
-
+/**
+ * 获取文档碎片初始化
+ */
+const load = (type, callbackSetList) => {
+  data = utools.db.get(type).data.map(d => ({
+    title: d[0], description: d[1], content: d[2]
+  }))
   callbackSetList(data)
 }
 
 /**
- * 根据搜索关键词过滤展示片段标题
+ * 根据搜索关键词过滤展示文档碎片标题
  */
-let filter = (searchWord, callbackSetList) => {
+const filter = (searchWord, callbackSetList) => {
     let _data_tmp = strFmt(searchWord) ? data.filter(item => strFmt(item.title).includes(strFmt(searchWord))) : data
     callbackSetList(_data_tmp)
 }
 
 /**
- * 选定搜索关键词，展示对应关键词下的所有片段
+ * 选定搜索关键词，复制粘贴预定的文档碎片到指定位置
  */
-let select = (itemData) => {
+const select = (itemData) => {
   window.utools.hideMainWindow()
   utools.copyText(itemData.content)
   if (utools.isWindows()) {
