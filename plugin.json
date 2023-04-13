@@ -31,6 +31,16 @@
       "code": "js_update",
       "cmds": ["ju"],
       "explain": "更新 js 代码库"
+    },
+    {
+      "code": "dev",
+      "cmds": ["d"],
+      "explain": "js 代码集锦"
+    },
+    {
+      "code": "dev_update",
+      "cmds": ["du"],
+      "explain": "更新代码开发仓库"
     }
   ]
 }
